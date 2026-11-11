@@ -47,6 +47,8 @@ pip install -r requirements.txt
 py app.py
 ```
 
+En Windows también puedes hacer doble clic en `run.bat`: crea el entorno, instala Flask y arranca la web.
+
 Abre `http://localhost:5000`. La base de datos `mestalla.db` se crea automáticamente la primera
 vez (para empezar de cero basta con borrar ese archivo).
 
