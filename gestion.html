@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block titulo %}Panel de gestión{% endblock %}
+
+{% block contenido %}
+<p class="chips">
+    <a class="chip" href="#pedidos">Pedidos ({{ pedidos | length }})</a>
+    <a class="chip" href="#productos">Productos</a>
+    <a class="chip" href="#mensajes">Mensajes ({{ mensajes | length }})</a>
+    {% if usuario.rol == 'administrador' %}<a class="chip" href="#usuarios">Usuarios</a>{% endif %}
+</p>
+
+<h2 id="pedidos">Pedidos</h2>
+{% if pedidos %}
+<table class="tabla">
+    <thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Envío / Pago</th><th>Total</th><th>Estado</th></tr></thead>
+    <tbody>
+    {% for p in pedidos %}
+        <tr>
+            <td><a href="{{ url_for('pedido_recibido', pedido_id=p.id) }}">#{{ p.id }}</a></td>
+            <td data-label="Fecha">{{ p.fecha }}</td>
+            <td data-label="Cliente">{{ p.nombre }}<br><small>{{ p.email }}</small></td>
+            <td data-label="Envío / Pago">{{ p.envio }}<br><small>{{ p.pago }}</small></td>
+            <td data-label="Total">{{ p.total | euros }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('gestion_pedido', pedido_id=p.id) }}" class="fila">
+                    <select name="estado" aria-label="Estado del pedido #{{ p.id }}">
+                        {% for e in estados %}<option {{ 'selected' if e == p.estado }}>{{ e }}</option>{% endfor %}
+                    </select>
+                    <button class="boton" type="submit">Guardar</button>
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}<p>No hay pedidos todavía.</p>{% endif %}
+
+<h2 id="productos">Productos</h2>
+<table class="tabla">
+    <thead><tr><th>Producto</th><th>Categoría</th><th>Precio (€)</th><th>Inventario</th><th>Destacado</th><th></th></tr></thead>
+    <tbody>
+    {% for p in productos %}
+        <tr>
+            <td><a href="{{ url_for('producto', slug=p.slug) }}">{{ p.nombre }}</a>
+                <form method="POST" action="{{ url_for('gestion_producto', producto_id=p.id) }}" id="prod{{ p.id }}"></form></td>
+            <td data-label="Categoría">{{ p.categoria }}</td>
+            <td data-label="Precio">
+                {% if p.tipo == 'variable' %}Ver variaciones
+                {% else %}<input form="prod{{ p.id }}" type="number" step="0.01" min="0" name="precio" value="{{ p.precio }}" aria-label="Precio">{% endif %}
+            </td>
+            <td data-label="Inventario">
+                {% if p.tipo == 'variable' %}–
+                {% else %}<input form="prod{{ p.id }}" type="number" name="stock" value="{{ p.stock if p.stock is not none }}" aria-label="Inventario">{% endif %}
+            </td>
+            <td data-label="Destacado"><input form="prod{{ p.id }}" type="checkbox" name="destacado" {{ 'checked' if p.destacado }} aria-label="Destacado"></td>
+            <td><button form="prod{{ p.id }}" class="boton" type="submit">Guardar</button></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h3>Variaciones (zona)</h3>
+<table class="tabla">
+    <thead><tr><th>Producto</th><th>Zona</th><th>Precio (€)</th><th>Inventario</th><th></th></tr></thead>
+    <tbody>
+    {% for v in variaciones %}
+        <tr>
+            <td>{{ v.producto }}
+                <form method="POST" action="{{ url_for('gestion_producto', producto_id=v.id) }}" id="var{{ v.id }}"></form>
+                <input form="var{{ v.id }}" type="hidden" name="variacion" value="1"></td>
+            <td data-label="Zona">{{ v.zona }}</td>
+            <td data-label="Precio"><input form="var{{ v.id }}" type="number" step="0.01" min="0" name="precio" value="{{ v.precio }}" aria-label="Precio"></td>
+            <td data-label="Inventario"><input form="var{{ v.id }}" type="number" name="stock" value="{{ v.stock if v.stock is not none }}" aria-label="Inventario"></td>
+            <td><button form="var{{ v.id }}" class="boton" type="submit">Guardar</button></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h2 id="mensajes">Mensajes de contacto</h2>
+{% for m in mensajes %}
+<div class="caja mensaje">
+    <p><strong>{{ m.nombre }}</strong> &lt;{{ m.email }}&gt; · {{ m.fecha }}<br><small>Partido: {{ m.partido }}</small></p>
+    <p>{{ m.mensaje }}</p>
+</div>
+{% else %}<p>No hay mensajes.</p>{% endfor %}
+
+{% if usuario.rol == 'administrador' %}
+<h2 id="usuarios">Usuarios</h2>
+<table class="tabla">
+    <thead><tr><th>Usuario</th><th>Nombre</th><th>Email</th><th>Rol</th></tr></thead>
+    <tbody>
+    {% for u in usuarios %}
+        <tr><td>{{ u.usuario }}</td><td data-label="Nombre">{{ u.nombre }}</td><td data-label="Email">{{ u.email }}</td><td data-label="Rol">{{ u.rol }}</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

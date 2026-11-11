@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import rejilla, estrellas, precio, lista_resenas %}
+{% block titulo %}{{ producto.nombre }}{% endblock %}
+{% block cabecera_pagina %}{% endblock %}
+
+{% block contenido %}
+<nav class="migas">
+    <a href="{{ url_for('index') }}">Inicio</a> /
+    <a href="{{ url_for('categoria', slug=producto.categoria_slug) }}">{{ producto.categoria }}</a> /
+    {{ producto.nombre }}
+</nav>
+
+<div class="producto">
+    <img class="producto__imagen" src="{{ url_for('static', filename='img/' ~ producto.imagen) }}" alt="{{ producto.nombre }}">
+
+    <div class="producto__info">
+        <h1>{{ producto.nombre }}</h1>
+        {% if producto.valoracion %}
+        <p>{{ estrellas(producto.valoracion) }} <a href="#resenas">({{ producto.num_resenas }} valoración{{ 'es' if producto.num_resenas != 1 }} de clientes)</a></p>
+        {% endif %}
+        <p class="producto__precio">{{ precio(producto) }}</p>
+        <p>{{ producto.descripcion_corta }}</p>
+
+        <form method="POST" action="{{ url_for('carrito_anadir') }}" class="form-compra">
+            <input type="hidden" name="producto_id" value="{{ producto.id }}">
+            {% if producto.tipo == 'variable' %}
+                <label for="variacion_id">Zona</label>
+                <select name="variacion_id" id="variacion_id" required>
+                    <option value="">Elige una opción</option>
+                    {% for v in variaciones %}
+                    <option value="{{ v.id }}" {{ 'disabled' if v.stock is not none and v.stock <= 0 }}>
+                        {{ v.zona }} – {{ v.precio | euros }}{% if v.stock is not none and v.stock <= 0 %} (agotado){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            {% elif producto.stock is not none %}
+                <p class="stock {{ 'stock--agotado' if producto.stock <= 0 }}">
+                    {{ producto.stock ~ ' disponibles' if producto.stock > 0 else 'Sin existencias' }}
+                </p>
+            {% endif %}
+
+            {% if producto.tipo == 'variable' or producto.stock is none or producto.stock > 0 %}
+            <div class="fila">
+                <input type="number" name="cantidad" value="1" min="1" max="{{ producto.stock or 99 }}" aria-label="Cantidad">
+                <button type="submit" class="boton">Añadir al carrito</button>
+            </div>
+            {% endif %}
+        </form>
+        <p class="producto__meta">Categoría: <a href="{{ url_for('categoria', slug=producto.categoria_slug) }}">{{ producto.categoria }}</a></p>
+    </div>
+</div>
+
+<section class="pestanas">
+    <h2>Descripción</h2>
+    <p>{{ producto.descripcion }}</p>
+</section>
+
+<section class="pestanas" id="resenas">
+    <h2>Valoraciones ({{ resenas | length }})</h2>
+    {{ lista_resenas(resenas, mostrar_producto=false) }}
+
+    {% if usuario %}
+    <form method="POST" action="{{ url_for('nueva_resena', slug=producto.slug) }}" class="formulario">
+        <h3>Añade una valoración</h3>
+        <fieldset class="valoracion">
+            <legend>Tu puntuación *</legend>
+            {% for i in range(5, 0, -1) %}
+            <input type="radio" id="estrella{{ i }}" name="valoracion" value="{{ i }}" required>
+            <label for="estrella{{ i }}" title="{{ i }} de 5">★</label>
+            {% endfor %}
+        </fieldset>
+        <label for="comentario">Tu valoración *</label>
+        <textarea id="comentario" name="comentario" rows="4" required></textarea>
+        <button type="submit" class="boton">Enviar</button>
+    </form>
+    {% else %}
+    <p>Debes <a href="{{ url_for('mi_cuenta') }}">acceder</a> para publicar una valoración.</p>
+    {% endif %}
+</section>
+
+{% if relacionados %}
+<h2>Productos relacionados</h2>
+{{ rejilla(relacionados) }}
+{% endif %}
+{% endblock %}

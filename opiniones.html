@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import lista_resenas %}
+{% block titulo %}Opiniones{% endblock %}
+
+{% block contenido %}
+<p>Opiniones de aficionados que ya han comprado sus entradas con nosotros. Para dejar la tuya, entra en tu cuenta y valora el producto que compraste.</p>
+{{ lista_resenas(resenas) }}
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import mapa %}
+{% block titulo %}Contacto{% endblock %}
+
+{% block contenido %}
+<p>¿Dudas con tu pedido o tus entradas? Escríbenos y te respondemos en menos de 24 horas.</p>
+<div class="columnas columnas--2">
+    <div>
+        <h3>Escríbenos</h3>
+        <!-- Formulario equivalente al de Contact Form 7 -->
+        <form method="POST" action="{{ url_for('contacto') }}" class="formulario">
+            <label for="nombre">Nombre (obligatorio)</label>
+            <input type="text" id="nombre" name="nombre" required autocomplete="name" value="{{ datos.get('nombre', '') }}">
+
+            <label for="email">Email (obligatorio)</label>
+            <input type="email" id="email" name="email" required autocomplete="email" value="{{ datos.get('email', '') }}">
+
+            <label for="partido">Partido de interés</label>
+            <select id="partido" name="partido">
+                {% for p in partidos %}<option {{ 'selected' if datos.get('partido') == p }}>{{ p }}</option>{% endfor %}
+            </select>
+
+            <label for="mensaje">Mensaje</label>
+            <textarea id="mensaje" name="mensaje" rows="6">{{ datos.get('mensaje', '') }}</textarea>
+
+            <button type="submit" class="boton">Enviar consulta</button>
+        </form>
+    </div>
+    <div>
+        <h3>Dónde estamos</h3>
+        <p>Taquillas del Estadio de Mestalla<br>Av. de Suècia, s/n, 46010 Valencia<br>Horario: lunes a viernes de 10:00 a 14:00 y de 17:00 a 20:00</p>
+        {{ mapa() }}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block titulo %}Pedido recibido{% endblock %}
+
+{% block contenido %}
+<p class="aviso aviso--ok">Gracias. Tu pedido ha sido recibido.</p>
+<ul class="resumen-pedido">
+    <li>Número del pedido: <strong>#{{ pedido.id }}</strong></li>
+    <li>Fecha: <strong>{{ pedido.fecha }}</strong></li>
+    <li>Email: <strong>{{ pedido.email }}</strong></li>
+    <li>Total: <strong>{{ pedido.total | euros }}</strong></li>
+    <li>Método de pago: <strong>{{ pedido.pago }}</strong></li>
+    <li>Estado: <strong>{{ pedido.estado }}</strong></li>
+</ul>
+{% if pago %}<p>{{ pago.instrucciones }}</p>{% endif %}
+
+<h2>Detalles del pedido</h2>
+<table class="tabla tabla--resumen">
+    <thead><tr><th>Producto</th><th>Total</th></tr></thead>
+    <tbody>
+        {% for l in lineas %}
+        <tr><td>{{ l.nombre }} × {{ l.cantidad }}</td><td>{{ (l.precio * l.cantidad) | euros }}</td></tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr><th>Subtotal</th><td>{{ pedido.subtotal | euros }}</td></tr>
+        <tr><th>Envío</th><td>{{ pedido.envio }}{% if pedido.coste_envio %}: {{ pedido.coste_envio | euros }}{% endif %}</td></tr>
+        <tr class="fila-total"><th>Total</th><td><strong>{{ pedido.total | euros }}</strong></td></tr>
+    </tfoot>
+</table>
+{% if pedido.direccion %}
+<h3>Dirección de envío</h3>
+<p>{{ pedido.nombre }}<br>{{ pedido.direccion }}<br>{{ pedido.cp }} {{ pedido.ciudad }} ({{ pedido.provincia }})</p>
+{% endif %}
+{% endblock %}

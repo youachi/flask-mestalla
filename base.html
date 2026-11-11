@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}{% endblock %}{% if self.titulo() %} – {% endif %}{{ sitio.nombre }}</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/escudo-valencia.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Cabecera (template part "header" del tema) -->
+    <header class="cabecera">
+        <div class="cabecera__marca">
+            <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='img/escudo-valencia.png') }}"
+                 alt="Escudo del Valencia CF" width="39" height="52"></a>
+            <a class="cabecera__titulo" href="{{ url_for('index') }}">{{ sitio.nombre }}</a>
+        </div>
+
+        <input type="checkbox" id="menu-toggle" class="menu-toggle">
+        <label for="menu-toggle" class="menu-boton" aria-label="Abrir menú">&#9776;</label>
+
+        <!-- Menú principal -->
+        <nav class="menu">
+            {% set ep = request.endpoint %}
+            <a href="{{ url_for('index') }}" class="{{ 'activo' if ep == 'index' }}">Inicio</a>
+            <a href="{{ url_for('entradas') }}" class="{{ 'activo' if ep in ('entradas', 'categoria', 'producto', 'tienda') }}">Entradas</a>
+            <a href="{{ url_for('estadio') }}" class="{{ 'activo' if ep == 'estadio' }}">Estadio</a>
+            <a href="{{ url_for('opiniones') }}" class="{{ 'activo' if ep == 'opiniones' }}">Opiniones</a>
+            <a href="{{ url_for('contacto') }}" class="{{ 'activo' if ep == 'contacto' }}">Contacto</a>
+            <a href="{{ url_for('mi_cuenta') }}" class="{{ 'activo' if ep == 'mi_cuenta' }}">Mi cuenta</a>
+            {% if usuario and usuario.rol in roles_gestion %}
+            <a href="{{ url_for('gestion') }}" class="{{ 'activo' if ep == 'gestion' }}">Gestión</a>
+            {% endif %}
+        </nav>
+
+        <div class="cabecera__acciones">
+            {% if usuario %}
+                <a class="enlace-naranja" href="{{ url_for('salir') }}">Cerrar sesión</a>
+            {% else %}
+                <a class="enlace-naranja" href="{{ url_for('mi_cuenta') }}">Acceder</a>
+            {% endif %}
+            <a class="mini-carrito" href="{{ url_for('carrito') }}" aria-label="Carrito">
+                <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5.2 4l.6 2H21l-2.4 8.4a2 2 0 0 1-1.9 1.6H8.4a2 2 0 0 1-1.9-1.5L3.6 2H1V0h4l.2 1z" transform="translate(0 1)"/></svg>
+                <span class="mini-carrito__num">{{ num_carrito }}</span>
+            </a>
+        </div>
+    </header>
+
+    {% block hero %}{% endblock %}
+
+    <main class="contenido">
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% for categoria, mensaje in mensajes %}
+            <div class="aviso aviso--{{ categoria }}">{{ mensaje }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% block cabecera_pagina %}
+            {% if self.titulo() %}<h1 class="titulo-pagina">{{ self.titulo() }}</h1>{% endif %}
+        {% endblock %}
+
+        {% block contenido %}{% endblock %}
+    </main>
+
+    <!-- Pie de página (template part "footer" del tema) -->
+    <footer class="pie">
+        <div class="pie__columnas">
+            <div>
+                <h3>Entradas VALENCIA</h3>
+                <p>Vive el fútbol en Mestalla. Venta de entradas, abonos y tours del estadio.</p>
+            </div>
+            <div>
+                <h3>Dónde estamos</h3>
+                <p>Estadio de Mestalla<br>Av. de Suècia, s/n<br>46010 Valencia</p>
+            </div>
+            <div>
+                <h3>Información</h3>
+                <p>
+                    <a href="{{ url_for('aviso_legal') }}">Aviso legal</a><br>
+                    <a href="{{ url_for('politica_privacidad') }}">Política de privacidad</a><br>
+                    <a href="{{ url_for('contacto') }}">Contacto</a>
+                </p>
+            </div>
+        </div>
+        <p class="pie__copy">© 2026 Valencia CF</p>
+    </footer>
+
+    <!-- Botón de WhatsApp (sustituye al plugin Joinchat) -->
+    <a class="whatsapp" target="_blank" rel="noopener"
+       href="https://wa.me/{{ sitio.whatsapp }}?text={{ sitio.whatsapp_mensaje | urlencode }}"
+       title="¿Te ayudamos?">
+        <span class="whatsapp__tip">¿Te ayudamos?</span>
+        <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><path fill="#fff" d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.4.7 4.7 1.9 6.7L3 29l6.9-2.2a12.7 12.7 0 0 0 6.1 1.5c7 0 12.7-5.7 12.7-12.7S23 3 16 3zm0 23.1c-2 0-3.9-.6-5.6-1.6l-.4-.2-4.1 1.3 1.3-4-.3-.4a10.5 10.5 0 1 1 9.1 4.9zm5.8-7.8c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6.3-.5c.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.4 3.7 5.9 5.2 2.9 1.1 3.5.9 4.1.8.6-.1 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.4z"/></svg>
+    </a>
+</body>
+</html>

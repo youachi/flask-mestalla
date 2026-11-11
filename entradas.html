@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import rejilla %}
+{% block titulo %}Entradas{% endblock %}
+
+{% block contenido %}
+<p>Elige tu partido y tu zona. Todas las entradas son nominativas y se envían por email o se recogen en taquilla.</p>
+{% for categoria, productos in secciones %}
+    <h2><a class="sin-subrayado" href="{{ url_for('categoria', slug=categoria.slug) }}">{{ categoria.nombre }}</a></h2>
+    {{ rejilla(productos) }}
+{% endfor %}
+<p><a href="{{ url_for('tienda') }}">Ver todos los productos de la tienda →</a></p>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import rejilla, lista_resenas %}
+{% block cabecera_pagina %}{% endblock %}
+
+{% block hero %}
+<section class="hero" style="background-image: url('{{ url_for('static', filename='img/mestalla-2.jpg') }}')">
+    <div class="hero__capa">
+        <h1>Vive el fútbol en Mestalla</h1>
+        <p>Compra tus entradas para liga, Copa del Rey, abonos y tours del estadio en un par de clics.</p>
+        <a class="boton boton--grande" href="{{ url_for('entradas') }}">Comprar entradas</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block contenido %}
+<h2>Próximos partidos</h2>
+{{ rejilla(productos) }}
+
+<h2>Por qué comprar con nosotros</h2>
+<div class="columnas">
+    <div class="caja">
+        <h3>Entrada al momento</h3>
+        <p>Recibe tu entrada electrónica por email nada más pagar, o recógela en taquilla.</p>
+    </div>
+    <div class="caja">
+        <h3>Pago seguro</h3>
+        <p>Paga con Bizum o directamente en las taquillas del estadio.</p>
+    </div>
+    <div class="caja">
+        <h3>Envíos a toda España</h3>
+        <p>Correos, SEUR y MRW para tus abonos y productos de merchandising.</p>
+    </div>
+</div>
+
+<h2>Lo que opinan nuestros aficionados</h2>
+{{ lista_resenas(resenas) }}
+{% endblock %}

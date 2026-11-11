@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import rejilla %}
+{% block titulo %}Tienda{% endblock %}
+
+{% block contenido %}
+<div class="barra-tienda">
+    <p>Mostrando {{ productos | length }} resultados</p>
+    <form method="GET" action="{{ url_for('tienda') }}">
+        <select name="orden" onchange="this.form.submit()" aria-label="Pedido de la tienda">
+            <option value="defecto" {{ 'selected' if orden == 'defecto' }}>Orden por defecto</option>
+            <option value="valoracion" {{ 'selected' if orden == 'valoracion' }}>Ordenar por valoración media</option>
+            <option value="precio" {{ 'selected' if orden == 'precio' }}>Ordenar por precio: bajo a alto</option>
+            <option value="precio-desc" {{ 'selected' if orden == 'precio-desc' }}>Ordenar por precio: alto a bajo</option>
+        </select>
+        <noscript><button class="boton" type="submit">Ordenar</button></noscript>
+    </form>
+</div>
+<p class="chips">
+    {% for c in categorias %}<a class="chip" href="{{ url_for('categoria', slug=c.slug) }}">{{ c.nombre }}</a>{% endfor %}
+</p>
+{{ rejilla(productos) }}
+{% endblock %}

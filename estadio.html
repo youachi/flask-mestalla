@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import mapa %}
+{% block titulo %}Estadio{% endblock %}
+
+{% block contenido %}
+<img class="imagen-redondeada" src="{{ url_for('static', filename='img/grada-de-la-mar.jpg') }}" alt="Grada del Estadio de Mestalla">
+<p>El Estadio de Mestalla, inaugurado en 1923, es uno de los campos de fútbol más antiguos de España. Tiene capacidad para unos 49.000 espectadores y es famoso por la inclinación de sus gradas, que hacen que el público esté muy cerca del césped.</p>
+
+<h2>Cómo llegar</h2>
+<p>
+    <strong>Dirección:</strong> Av. de Suècia, s/n, 46010 Valencia.<br>
+    <strong>Metro:</strong> Aragón (líneas 5 y 7) y Facultats (línea 3).<br>
+    <strong>Autobús:</strong> líneas 10, 12, 32, 71, 80 y 81 de EMT.
+</p>
+{{ mapa() }}
+{% endblock %}

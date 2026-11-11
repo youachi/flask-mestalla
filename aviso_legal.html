@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block titulo %}Aviso legal{% endblock %}
+
+{% block contenido %}
+<p>Si usted accede a esta página sin ser aficionado del Valencia C.F. sufrirá graves consecuencias legales y/o físicas</p>
+<img src="{{ url_for('static', filename='img/aviso-legal.png') }}" alt="">
+{% endblock %}

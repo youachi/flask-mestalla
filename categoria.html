@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import rejilla %}
+{% block titulo %}{{ categoria.nombre }}{% endblock %}
+
+{% block contenido %}
+<nav class="migas"><a href="{{ url_for('index') }}">Inicio</a> / <a href="{{ url_for('tienda') }}">Tienda</a> / {{ categoria.nombre }}</nav>
+<p>{{ categoria.descripcion }}</p>
+{{ rejilla(productos) }}
+{% endblock %}

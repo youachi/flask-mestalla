@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block titulo %}Carrito{% endblock %}
+
+{% block contenido %}
+{% if lineas %}
+<form method="POST" action="{{ url_for('carrito_actualizar') }}">
+    <table class="tabla">
+        <thead>
+            <tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for l in lineas %}
+            <tr>
+                <td class="tabla__producto">
+                    <img src="{{ url_for('static', filename='img/' ~ l.producto.imagen) }}" alt="">
+                    <a href="{{ url_for('producto', slug=l.producto.slug) }}">{{ l.nombre }}</a>
+                </td>
+                <td data-label="Precio">{{ l.precio | euros }}</td>
+                <td data-label="Cantidad">
+                    <input type="number" name="cantidad_{{ l.clave }}" value="{{ l.cantidad }}" min="0"
+                           {% if l.stock is not none %}max="{{ l.stock }}"{% endif %} aria-label="Cantidad">
+                </td>
+                <td data-label="Subtotal">{{ l.total | euros }}</td>
+                <td>
+                    <button type="submit" class="boton-icono" formaction="{{ url_for('carrito_eliminar', clave=l.clave) }}"
+                            aria-label="Eliminar {{ l.nombre }}">✕</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="boton boton--secundario">Actualizar carrito</button>
+</form>
+
+<div class="totales">
+    <h2>Total del carrito</h2>
+    <p class="fila-total"><span>Subtotal</span><strong>{{ subtotal | euros }}</strong></p>
+    {% if subtotal >= 100 %}
+    <p class="nota">Tu pedido tiene envío gratuito.</p>
+    {% else %}
+    <p class="nota">Te faltan {{ (100 - subtotal) | euros }} para el envío gratuito.</p>
+    {% endif %}
+    <a class="boton boton--grande" href="{{ url_for('finalizar_compra') }}">Finalizar compra</a>
+</div>
+{% else %}
+<p>Tu carrito está vacío.</p>
+<p><a class="boton" href="{{ url_for('entradas') }}">Ver entradas</a></p>
+{% endif %}
+{% endblock %}

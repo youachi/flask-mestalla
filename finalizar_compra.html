@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block titulo %}Finalizar compra{% endblock %}
+
+{% block contenido %}
+{% if not usuario %}
+<p class="aviso aviso--info">¿Ya eres cliente? <a href="{{ url_for('mi_cuenta') }}">Accede a tu cuenta</a> para ver tus pedidos después.</p>
+{% endif %}
+
+<form method="POST" action="{{ url_for('finalizar_compra') }}" class="checkout" id="checkout">
+    <div class="formulario">
+        <h2>Detalles de facturación</h2>
+        <label for="nombre">Nombre y apellidos *</label>
+        <input type="text" id="nombre" name="nombre" required value="{{ datos.get('nombre', '') }}">
+
+        <label for="email">Correo electrónico *</label>
+        <input type="email" id="email" name="email" required value="{{ datos.get('email', '') }}">
+
+        <label for="telefono">Teléfono</label>
+        <input type="tel" id="telefono" name="telefono" value="{{ datos.get('telefono', '') }}">
+
+        <label for="direccion">Dirección (necesaria para envíos a domicilio)</label>
+        <input type="text" id="direccion" name="direccion" value="{{ datos.get('direccion', '') }}">
+
+        <div class="fila">
+            <div>
+                <label for="cp">Código postal</label>
+                <input type="text" id="cp" name="cp" value="{{ datos.get('cp', '') }}">
+            </div>
+            <div>
+                <label for="ciudad">Población</label>
+                <input type="text" id="ciudad" name="ciudad" value="{{ datos.get('ciudad', '') }}">
+            </div>
+        </div>
+
+        <label for="provincia">Provincia *</label>
+        <select id="provincia" name="provincia" required>
+            {% for p in provincias %}<option {{ 'selected' if datos.get('provincia') == p }}>{{ p }}</option>{% endfor %}
+        </select>
+    </div>
+
+    <div>
+        <h2>Tu pedido</h2>
+        <table class="tabla tabla--resumen">
+            <thead><tr><th>Producto</th><th>Subtotal</th></tr></thead>
+            <tbody>
+                {% for l in lineas %}
+                <tr><td>{{ l.nombre }} × {{ l.cantidad }}</td><td>{{ l.total | euros }}</td></tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr><th>Subtotal</th><td>{{ subtotal | euros }}</td></tr>
+                <tr>
+                    <th>Envío</th>
+                    <td class="envios">
+                        {% for clave, e in envios.items() %}
+                        {% set disponible = subtotal >= e.get('minimo', 0) %}
+                        <label class="opcion {{ 'opcion--desactivada' if not disponible }}">
+                            <input type="radio" name="envio" value="{{ clave }}" {{ 'checked' if datos.get('envio') == clave }}
+                                   {{ 'disabled' if not disponible }} data-peninsula="{{ e.peninsula }}" data-islas="{{ e.islas }}">
+                            <span>{{ e.nombre }}<span class="coste" data-coste="{{ clave }}">{% if e.peninsula %}: {{ e.peninsula | euros }}{% endif %}</span></span>
+                        </label>
+                        {% endfor %}
+                    </td>
+                </tr>
+                <tr class="fila-total"><th>Total</th><td><strong id="total">{{ subtotal | euros }}</strong></td></tr>
+            </tfoot>
+        </table>
+
+        <h3>Método de pago</h3>
+        {% for clave, p in pagos.items() %}
+        <label class="opcion opcion--pago">
+            <input type="radio" name="pago" value="{{ clave }}" {{ 'checked' if datos.get('pago') == clave }} required>
+            <strong>{{ p.nombre }}</strong>
+            <span class="nota">{{ p.descripcion }}</span>
+        </label>
+        {% endfor %}
+
+        <p class="nota">Tus datos personales se utilizarán para procesar tu pedido, tal y como se describe en nuestra
+            <a href="{{ url_for('politica_privacidad') }}">política de privacidad</a>.</p>
+        <button type="submit" class="boton boton--grande">Realizar el pedido</button>
+    </div>
+</form>
+
+<script>
+    // Recalcula el coste del envío y el total según la provincia (zonas de WooCommerce)
+    (function () {
+        const subtotal = {{ subtotal }};
+        const islas = {{ islas | tojson }};
+        const form = document.getElementById('checkout');
+        const fmt = n => n.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+        function actualizar() {
+            const zona = islas.includes(form.provincia.value) ? 'islas' : 'peninsula';
+            let envio = 0;
+            form.querySelectorAll('input[name=envio]').forEach(r => {
+                const coste = parseFloat(r.dataset[zona]);
+                form.querySelector('[data-coste="' + r.value + '"]').textContent = coste ? ': ' + fmt(coste) : '';
+                if (r.checked) envio = coste;
+            });
+            document.getElementById('total').textContent = fmt(subtotal + envio);
+        }
+        form.addEventListener('change', actualizar);
+        actualizar();
+    })();
+</script>
+{% endblock %}
